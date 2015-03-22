@@ -1,0 +1,223 @@
+template <typename T>
+posibilidades<T>::posibilidades(const map<T, vector<T> >& cuales, const multimap<T,pair<T,T> >& est, const multimap<T,pair<T,T> >& ins) : _options(cuales.size()) {
+    bool error = false;
+    set<unsigned int> lofijo;
+    _total = cuales.size();
+    unsigned int i = 0;
+    
+//     map<T, vector<T> > new_cuales;
+//     
+//     for (typename map<T, vector<T> >::const_iterator it = cuales.begin(); (it != cuales.end()) and !error; ++it) {
+//       // Reviso cuales son posibles
+//       // Reviso ejes salientes
+//       vector<T> sub;
+//       pair< multimap<T,pair<T,T> >::const_iterator,multimap<T,pair<T,T> >::const_iterator > mi_sal = est.equal_range(it->first);
+//       
+//       for (vector<T>::const_iterator itn = it->begin();; itn != it->end(): ++itn) {
+// 	pair< multimap<T,pair<T,T> >::const_iterator,multimap<T,pair<T,T> >::const_iterator > tu_sal = ins.equal_range(*itn);
+// 	
+// 	bool found = true;
+// 	set< pair<T,T> > usados;
+// 	for (multimap<T,pair<T,T> >::const_iterator itmp = mi_sal.first; (itmp != (mi_sal.second + 1)) and found; ++itmp) {
+// 	  found = false;
+// 	  for (multimap<T,pair<T,T> >::const_iterator ittp = tu_sal.first; (ittp != (tu_sal.second + 1)) and !found; ++ittp) {
+// 	    if ((itmp->second.second == ittp->second.second) and (itmp->second.first)) {
+// 	      usados.insert(ittp->second);
+// 	    }
+// 	  }
+// 	}
+// 	
+// 	if (found) {
+// 	  sub.push_back(itn);
+// 	}
+//       }
+//       new_cuales[*it] = sub;
+//     }
+//     
+    
+    for (typename map<T, vector<T> >::const_iterator it = cuales.begin(); (it != cuales.end()) and !error; ++it) {
+      if ((*it).second.size() == 1) {
+	if (lofijo.find((*it).second.front()) == lofijo.end()) {
+	  _fijos[(*it).first] = (*it).second.front();
+	  lofijo.insert((*it).second.front());
+	}
+	else {
+	  // No hay opciones validas
+	  error = true;
+	  _fijos.clear();
+	  _options.clear();
+	}
+      }
+      else {
+	_options[i] = (*it).second;
+	_lapos[i++] = (*it).first;
+      }
+    }
+    _options.resize(i);
+    
+    for (typename map<T,T>::iterator p = _fijos.begin(); p != _fijos.end(); ++p)
+      cout << "F " << (*p).first << " -> " << (*p).second << endl;
+    
+    for (unsigned int i = 0; i < _options.size(); ++i) {
+      cout << "M " << _lapos[i] << " -> ";
+      for (unsigned int j = 0; j < _options[i].size(); ++j) 
+	cout << _options[i][j] << ' ';
+      cout << endl;
+    }
+    
+    _ins = ins;
+    _est = est;
+}
+
+template <typename T>
+typename posibilidades<T>::iterator posibilidades<T>::iterator::operator++() {  
+    _pos++;
+
+    bool res = false;
+    if (_donde.size() > 0) {
+      bool nuevo = false;
+      bool done = false;
+  
+      do {
+	done = false;
+	
+	if (nuevo) {
+	  _donde[_sitio] = -1;
+	}
+	
+	do {
+	  ++_donde[_sitio];
+	      
+	  if (_donde[_sitio] < (*_cuales)[_sitio].size()) {
+	      cout << "OPCION: " << _sitio << endl;
+	      for (int i = 0; i <= _sitio; i++) {
+		  cout << i + 1 << ' ' << (*_cuales)[i][_donde[i]] << endl;
+	      }
+	
+	    // Verifico que sea valido
+	    // Primero reviso que no sea repetido el dato
+	    bool valid = true;
+
+	    for (int i = 0; (i < _sitio) and valid; ++i) {
+	      valid = ((*_cuales)[i][_donde[i]] != (*_cuales)[_sitio][_donde[_sitio]]);
+	    }
+	    
+	    if (valid) {
+	      // Segundo reviso ejes hasta el momento
+	      map<T,T> actual = *_lafija;
+	  
+	      for (int i = 0; i <= _sitio; i++) {
+		typename map<unsigned int,T>::iterator it = _index->find(i);
+		actual[(*it).second] = (*_cuales)[i][_donde[i]];
+	      }
+	
+	      for (typename multimap<T,pair<T,T> >::const_iterator it_est = _lest->begin(); (it_est != _lest->end()) and valid; ++it_est) {
+		// Paso el primero
+		cout << "Pri " << it_est->first << endl;
+		typename map<T,T>::iterator pri = actual.find(it_est->first);
+		if (pri != actual.end()) {
+		  cout << " found!" << pri->second << endl;
+		  // Paso el segundo
+		  typename map<T,T>::iterator seg = actual.find(it_est->second.first);
+		  cout << "Seg " << it_est->second.first << endl;
+
+		  if (seg != actual.end()) {
+		    cout << " found!" << seg->second << endl;
+		    pair<typename multimap<T,pair<T,T> >::const_iterator, typename multimap<T,pair<T,T> >::const_iterator> bus = _lins->equal_range(pri->second);
+		    valid = false;
+		    while ((bus.first != bus.second) and !valid) {
+		      valid = (((*(bus.first)).second.first == seg->second) and (it_est->second.second == (*(bus.first)).second.second));
+		      ++(bus.first);
+		    }
+		  }
+		}
+	      }
+	    }
+	    
+	    if (valid) {
+	      if (_sitio + 1 < (int)_donde.size()) {
+		++_sitio;
+		nuevo = true;
+		done = true;
+	      }
+	      else {
+		res = true;
+	      }
+	    }
+	    else
+	      cout << "invalid!" << endl;
+	  }
+	  else {
+	    cout << "Me pase" << endl;
+	    --_sitio;
+	  }
+	}
+	while (!done and !res and (_sitio >= 0));
+      }
+      while (!res and (_sitio >= 0));
+	
+      if (!res)
+	_pos = -1;
+      else
+	cout << "VALID!" << endl;
+   }
+   else
+     _pos = -1;
+      
+   return *this;
+}
+
+template <typename T>
+map<T,T> posibilidades<T>::iterator::operator*() {
+   map<T,T> res = *_lafija;
+    
+//    cout << "OPCION: ";
+   for (unsigned int i = 0; i < _donde.size(); i++) {
+	typename map<unsigned int,T>::iterator it = _index->find(i);
+        res[(*it).second] = (*_cuales)[i][_donde[i]];
+  //       cout << (*it).second << ' ' << res[(*it).second] << ' ';
+   }
+   // cout << endl;
+    
+   return res;
+}
+
+template <typename T>
+posibilidades<T>::iterator::iterator(vector< vector<T> >* cuales, map<unsigned int,T>* que, map<T,T>* quien, multimap<T,pair<T,T> >* est, multimap<T,pair<T,T> >* ins, const int p) : _donde(cuales->size(), 0) {
+    _pos = p;
+    _cuales = cuales;
+    _index = que;
+    _lafija = quien;
+    _sitio = 0;
+    _lins = ins;
+    _lest = est;
+    
+    if (_donde.size() > 0)
+      --_donde[_sitio];
+}
+                
+template <typename T>
+typename posibilidades<T>::iterator posibilidades<T>::begin() {
+    bool done = (((_options.size()) + (_fijos.size())) != _total);
+    
+    for (unsigned int i = 0; (i < _options.size()) && !done; i++) {
+        done = (_options[i].size() == 0);
+    }
+    
+    if (!done) {
+      if (_options.size() != 0) {
+	      return ++(typename posibilidades<T>::iterator(&_options, &_lapos, &_fijos, &_est, &_ins, 0));
+      }
+      else {
+	// Solo fijas
+	return typename posibilidades<T>::iterator(&_options, &_lapos, &_fijos, &_est, &_ins, 0);
+      }
+    }
+    else
+        return typename posibilidades<T>::iterator(-1);
+}
+
+template <typename T>
+typename posibilidades<T>::iterator posibilidades<T>::end() {
+    return typename posibilidades<T>::iterator(-1);
+}
