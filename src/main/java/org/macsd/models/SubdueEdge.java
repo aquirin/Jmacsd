@@ -16,6 +16,10 @@ public class SubdueEdge extends AntEdge {
 		this.type = _type;
 		this.label = _label;
 	}
+	
+	public String getLabel() {
+		return label;
+	}
 
 	/*public int hashCode() {
 		return label.hashCode();

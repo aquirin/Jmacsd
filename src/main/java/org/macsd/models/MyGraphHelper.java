@@ -5,6 +5,7 @@
 package models;
 
 import java.util.Set;
+import java.util.TreeSet;
 import java.util.Vector;
 
 import org.jgrapht.graph.DefaultDirectedGraph;
@@ -51,13 +52,71 @@ public class MyGraphHelper {
 	}
 	
 	/*
+	 * Count the total number of nodes in the DB.
+	 */
+	public static int countNodes(Vector<DefaultDirectedGraph<SubdueVertex, SubdueEdge>> db) {
+		int count = 0;
+		for(DefaultDirectedGraph<SubdueVertex, SubdueEdge> g: db) {
+			count += g.vertexSet().size();
+		}
+		return count;
+	}
+	
+	/*
 	 * Count the total number of edges in the DB.
 	 */
-	public static int countEdge(Vector<DefaultDirectedGraph<SubdueVertex, SubdueEdge>> db) {
+	public static int countEdges(Vector<DefaultDirectedGraph<SubdueVertex, SubdueEdge>> db) {
 		int count = 0;
 		for(DefaultDirectedGraph<SubdueVertex, SubdueEdge> g: db) {
 			count += g.edgeSet().size();
 		}
 		return count;
 	}
+	
+	/*
+	 * Count the number of distinct edge labels in the DB.
+	 */
+	public static int countEdgeLabels(Vector<DefaultDirectedGraph<SubdueVertex, SubdueEdge>> db) {
+		Set<String> sl = new TreeSet<String>();
+		Set<SubdueEdge> sedges = edgeSet(db);
+		for(SubdueEdge e: sedges) {
+			sl.add(e.getLabel());
+		}
+		return sl.size();
+	}
+	
+	/*
+	 * Compute the degree of a node.
+	 */
+	public static int degree(Vector<DefaultDirectedGraph<SubdueVertex, SubdueEdge>> db, SubdueVertex n) {
+		int degree = 0;
+		for(DefaultDirectedGraph<SubdueVertex, SubdueEdge> g: db) {
+			degree += g.inDegreeOf(n);
+			degree += g.outDegreeOf(n);
+		}
+		return degree;
+	}
+	
+	/*
+	 * Set of the nodes of all the given DB.
+	 */
+	public static Set<SubdueVertex> nodeSet(Vector<DefaultDirectedGraph<SubdueVertex, SubdueEdge>> db) {
+		Set<SubdueVertex> snodes = new TreeSet<SubdueVertex>();
+		for(DefaultDirectedGraph<SubdueVertex, SubdueEdge> g: db) {
+			snodes.addAll(g.vertexSet());
+		}
+		return snodes;
+	}
+	
+	/*
+	 * Set of the edges of all the given DB.
+	 */
+	public static Set<SubdueEdge> edgeSet(Vector<DefaultDirectedGraph<SubdueVertex, SubdueEdge>> db) {
+		Set<SubdueEdge> sedges = new TreeSet<SubdueEdge>();
+		for(DefaultDirectedGraph<SubdueVertex, SubdueEdge> g: db) {
+			sedges.addAll(g.edgeSet());
+		}
+		return sedges;
+	}
+	
 }

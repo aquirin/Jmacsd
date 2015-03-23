@@ -14,6 +14,9 @@
  * - A graph is a connected collection of nodes and edges.
  * - A database (DB) is a set of disconnected graphs.
  * - A subdue DB is both a positive DB and a negative DB.
+ * 
+ * We assume that only one edge can link the same pair of nodes.
+ * Loop are allowed, but not multi-graph.
  */
 
 package filters;

@@ -4,6 +4,8 @@ import java.util.Vector;
 import org.jgrapht.graph.DefaultDirectedGraph;
 
 import aco.Heuristics;
+import aco.MathHelper;
+import models.MyGraphHelper;
 import models.SubdueEdge;
 import models.SubdueVertex;
 import models.SubdueVisualization;
@@ -50,6 +52,10 @@ public class MACSD_Main {
 			if (ss.matches(pattern))
 				System.out.println("OK " + ss);
 		}
+		
+		for(int i=0; i<20; i++) {
+			System.out.println("log2fact(" + i + ") = " + MathHelper.log2fact(i));
+		}
 
 	}
 	
@@ -76,13 +82,23 @@ public class MACSD_Main {
 		
 		System.out.println("Heuristic static: " + Heuristics.hstatic(sf.pos(), e2));
 		System.out.println("Heuristic static +/-: " + Heuristics.hstatic(sf, e2));
+		
+		System.out.println("MDL(+): " + Heuristics.mdl(sf.pos()));
+		System.out.println("MDL(-): " + Heuristics.mdl(sf.neg()));
+
+		// Degree
+		int d1 = MyGraphHelper.degree(sf.pos(), n1);
+		int d2 = MyGraphHelper.degree(sf.pos(), n2);
+		
+		System.out.println("Degree n1: " + d1);
+		System.out.println("Degree n2: " + d2);
 
 	}
 
 	public static void main(String[] args) {
 
 		//test1();
-		// test2();
+		//test2();
 		test3();
 	}
 
