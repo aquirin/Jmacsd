@@ -1,10 +1,13 @@
 /*
  * Subdue format.
+ * - allow for undirected (u) or directed edges (d,e)
+ * - a single graph can contain both kind of edges
+ * 
  * To separate two graphs:
  * - or use XP/XN
  * - or use "v 1" for the next node definition
  * 
- * These are not reliable
+ * We do not considere these options to separate two graphs:
  * - use blank line to separate graphs (some files separate nodes and eges
  *   by a blank line)
  * - consider the new graph start by the next node definition (some files
@@ -26,6 +29,7 @@ import java.io.FileReader;
 import java.io.IOException;
 import java.util.Vector;
 
+import models.MyGraphHelper;
 import models.SubdueVisualization;
 import models.SubdueEdge;
 import models.SubdueVertex;
@@ -96,6 +100,7 @@ public class SubdueDB {
 						) {
 					// Create a new graph
 					graph = new DefaultDirectedGraph<SubdueVertex, SubdueEdge>(SubdueEdge.class);
+					SubdueEdge.setComparisonType(SubdueEdge.ComparisonType.INDEX);
 					isLastEdge = false;
 					if(gtype == GraphType.POSITIVE_GRAPH)
 						db_pos.add(graph);
@@ -121,12 +126,13 @@ public class SubdueDB {
 						etype = EdgeType.DIRECTED_EDGE;
 					}
 					
-					SubdueEdge edge = new SubdueEdge(etype, fields[3]);
 					int n1 = Integer.parseInt(fields[1]);
 					int n2 = Integer.parseInt(fields[2]);
-					SubdueVertex v1 = findVertex(graph, n1);
-					SubdueVertex v2 = findVertex(graph, n2);
-					graph.addEdge(v1, v2, edge);
+					SubdueVertex v1 = MyGraphHelper.findVertex(graph, n1);
+					SubdueVertex v2 = MyGraphHelper.findVertex(graph, n2);
+					SubdueEdge edge = new SubdueEdge(etype, fields[3], v1, v2);
+					boolean flag = graph.addEdge(v1, v2, edge);
+					//System.out.println("Add (" + v1 + "," + v2 + "," + edge + "): " + flag);
 				}
 			}
 		} catch (IOException e) {
@@ -139,17 +145,6 @@ public class SubdueDB {
 			System.out.println("Problem with: " + n + ". " + line);
 			e.printStackTrace();
 		}
-	}
-	
-	/*
-	 * Return in the given graph the vertex with the given index.
-	 */
-	private static SubdueVertex findVertex(DefaultDirectedGraph<SubdueVertex, SubdueEdge> g, int i) {
-		for(SubdueVertex n: g.vertexSet()) {
-			if(n.getIndex() == i)
-				return n;
-		}
-		return null;
 	}
 	
 	/*
